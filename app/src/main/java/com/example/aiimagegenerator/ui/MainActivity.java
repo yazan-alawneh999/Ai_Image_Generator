@@ -45,20 +45,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         activityMain2Binding = DataBindingUtil.setContentView(this, R.layout.activity_main2);
         aiGenerateViewModel = new ViewModelProvider(this).get(AIGenerateViewModel.class);
-
-
-        FirebaseUtil.getCurrentUserRef()
-                .get()
-                .addOnSuccessListener(dataSnapshot -> {
-                    if (dataSnapshot.exists()) {
-                        if (dataSnapshot.hasChild("isAdmin")) {
-                            activityMain2Binding.setIsAdmin(true);
-                        } else {
-                            activityMain2Binding.setIsAdmin(false);
-                        }
-                    }
-
-                });
+        activityMain2Binding.setIsAdmin(true);
         activityMain2Binding.generateBtn.setOnClickListener(v ->
         {
             activityMain2Binding.setIsAdmin(false);
@@ -66,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
             activityMain2Binding.setIsLoading(true);
             String prompt = activityMain2Binding.promptEt.getText().toString();
             aiGenerateViewModel.generateImage(new ImageGenerate(prompt, "256x256"), "Bearer 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");
+            activityMain2Binding.imageDescription.setText("");
             callApi(prompt);
         });
         aiGenerateViewModel.getGenerateImageResponseLiveData().observe(this,s -> {
@@ -138,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
         try {
             object1.put("model", "gpt-3.5-turbo-instruct");
             object1.put("prompt", prompt);
-            object1.put("max_tokens", 40);
+            object1.put("max_tokens", 500);
             object1.put("temperature", 0);
         } catch (Exception e) {
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
@@ -170,12 +158,12 @@ public class MainActivity extends AppCompatActivity {
                     runOnUiThread(() -> {
                         activityMain2Binding.imageDescription.setText(result);
                         activityMain2Binding.setIsLoading(false);
-                        FirebaseUtil.getCurrentUserRef().get().addOnSuccessListener(dataSnapshot ->
-                        {
-                            if (dataSnapshot.hasChild("isAdmin")) {
-                                activityMain2Binding.setIsAdminBackBtn(true);
-                            }
-                        });
+//                        FirebaseUtil.getCurrentUserRef().get().addOnSuccessListener(dataSnapshot ->
+//                        {
+//                            if (dataSnapshot.hasChild("isAdmin")) {
+//                                activityMain2Binding.setIsAdminBackBtn(true);
+//                            }
+//                        });
                     });
                 } catch (Exception e1) {
                     Log.d(TAG, "onResponse: Error : " + e1.getMessage());
@@ -190,7 +178,6 @@ public class MainActivity extends AppCompatActivity {
                     .load(imageUrl)
                     .centerCrop()
                     .into(activityMain2Binding.generatedImage);
-            activityMain2Binding.setIsLoading(false);
             callApi1(prompt);
         });
 
