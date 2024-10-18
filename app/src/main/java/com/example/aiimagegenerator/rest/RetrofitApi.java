@@ -3,6 +3,7 @@ package com.example.aiimagegenerator.rest;
 import com.example.aiimagegenerator.interfaces.ApiService;
 
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public final class RetrofitApi {
@@ -12,6 +13,7 @@ public final class RetrofitApi {
     public RetrofitApi() {
         this.retrofit = new Retrofit.Builder()
                 .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJava3CallAdapterFactory.create())
                 .baseUrl("https://api.openai.com/v1/")
                 .build();
     }

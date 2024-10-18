@@ -14,6 +14,7 @@ import com.bumptech.glide.Glide;
 import com.example.aiimagegenerator.R;
 import com.example.aiimagegenerator.databinding.ActivityMain2Binding;
 import com.example.aiimagegenerator.models.ImageGenerate;
+import com.example.aiimagegenerator.requests.ImageGenerateRequest;
 import com.example.aiimagegenerator.util.FirebaseUtil;
 import com.example.aiimagegenerator.viewmodel.AIGenerateViewModel;
 
@@ -45,41 +46,31 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         activityMain2Binding = DataBindingUtil.setContentView(this, R.layout.activity_main2);
         aiGenerateViewModel = new ViewModelProvider(this).get(AIGenerateViewModel.class);
-        activityMain2Binding.setIsAdmin(true);
-        activityMain2Binding.generateBtn.setOnClickListener(v ->
-        {
-            activityMain2Binding.setIsAdmin(false);
-            activityMain2Binding.setIsAdminBackBtn(false);
-            activityMain2Binding.setIsLoading(true);
+
+        activityMain2Binding.setViewModel(aiGenerateViewModel);
+        activityMain2Binding.setLifecycleOwner(this);
+
+        activityMain2Binding.generateBtn.setOnClickListener(v -> {
+
             String prompt = activityMain2Binding.promptEt.getText().toString();
-            aiGenerateViewModel.generateImage(new ImageGenerate(prompt, "256x256"), "Bearer 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");
-            activityMain2Binding.imageDescription.setText("");
-            callApi(prompt);
+            if (prompt.isEmpty()) {
+                Toast.makeText(this, "Please Enter Prompt", Toast.LENGTH_SHORT).show();
+            } else {
+
+                aiGenerateViewModel
+                        .getResponse(prompt);
+            }
+//            aiGenerateViewModel.generateImage(new ImageGenerateRequest(prompt,1,"1024x1024"),
+//                    "Bearer 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");
+//            activityMain2Binding.imageDescription.setText("");
         });
-        aiGenerateViewModel.getGenerateImageResponseLiveData().observe(this,s -> {
-//            JSONObject jsonObject = new JSONObject((response.body().string()));
-//            String result = jsonObject.getJSONArray("choices").getJSONObject(0).getString("text");
-//            runOnUiThread(() -> {
-//                activityMain2Binding.imageDescription.setText(result);
-//                activityMain2Binding.setIsLoading(false);
-//                FirebaseUtil.getCurrentUserRef().get().addOnSuccessListener(dataSnapshot ->
-//                {
-//                    if (dataSnapshot.hasChild("isAdmin")) {
-//                        activityMain2Binding.setIsAdminBackBtn(true);
-//                    }
-//                });
-//            });
-        });
-        activityMain2Binding.logout.setOnClickListener(v ->
-        {
+        activityMain2Binding.logout.setOnClickListener(v -> {
             FirebaseUtil.getAuth().signOut();
             Intent in = new Intent(getApplicationContext(), LoginActivity.class);
             startActivity(in);
             finish();
         });
-        activityMain2Binding.back.setOnClickListener(v -> {
-            activityMain2Binding.setIsAdmin(true);
-        });
+        ;
 
 
     }
@@ -87,15 +78,18 @@ public class MainActivity extends AppCompatActivity {
     private void callApi(String prompt) {
         JSONObject object = new JSONObject();
         try {
+            object.put("model", "dall-e-3");
             object.put("prompt", prompt);
-            object.put("size", "256x256");
+            object.put("size", "1024x1024");
+            object.put("n", 1);
         } catch (Exception e) {
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
         RequestBody requestBody = RequestBody.create(object.toString(), JSON);
         Request request = new Request.Builder()
                 .url("https://api.openai.com/v1/images/generations")
-                .header("Authorization", "Bearer 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")
+                .header("Authorization", "Bearer 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")
+                .header("Content-Type", "application/json")
                 .post(requestBody)
                 .build();
 
@@ -114,8 +108,7 @@ public class MainActivity extends AppCompatActivity {
                     imageUrl = jsonObject.getJSONArray("data").getJSONObject(0).getString("url");
                     loadImage(imageUrl, prompt);
                 } catch (Exception e1) {
-                    Toast.makeText(MainActivity.this, e1.getMessage(), Toast.LENGTH_SHORT).show();
-
+                    Log.d(TAG, "onResponse: Error : " + e1.getMessage());
                 }
             }
         });
@@ -124,17 +117,19 @@ public class MainActivity extends AppCompatActivity {
     private void callApi1(String prompt) {
         JSONObject object1 = new JSONObject();
         try {
-            object1.put("model", "gpt-3.5-turbo-instruct");
+            object1.put("model", "dall-e-3");
             object1.put("prompt", prompt);
-            object1.put("max_tokens", 500);
-            object1.put("temperature", 0);
+            object1.put("size", "1024x1024");
+            object1.put("quality", "standard");
+            object1.put("n", 1);
         } catch (Exception e) {
             Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
         RequestBody requestBody1 = RequestBody.create(object1.toString(), JSON);
         Request request1 = new Request.Builder()
-                .url("https://api.openai.com/v1/completions")
-                .header("Authorization", "Bearer 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")
+                .url("https://api.openai.com/v1/chat/completions")
+                .header("Authorization", "Bearer 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")
+//                .header("Authorization", "Bearer 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")
                 .post(requestBody1)
                 .build();
 
@@ -143,7 +138,6 @@ public class MainActivity extends AppCompatActivity {
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 runOnUiThread(() -> {
                     Toast.makeText(MainActivity.this, "failed to generate image", Toast.LENGTH_SHORT).show();
-                    activityMain2Binding.setIsLoading(false);
 
                 });
 
@@ -157,7 +151,6 @@ public class MainActivity extends AppCompatActivity {
                     String result = jsonObject.getJSONArray("choices").getJSONObject(0).getString("text");
                     runOnUiThread(() -> {
                         activityMain2Binding.imageDescription.setText(result);
-                        activityMain2Binding.setIsLoading(false);
 //                        FirebaseUtil.getCurrentUserRef().get().addOnSuccessListener(dataSnapshot ->
 //                        {
 //                            if (dataSnapshot.hasChild("isAdmin")) {
@@ -178,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
                     .load(imageUrl)
                     .centerCrop()
                     .into(activityMain2Binding.generatedImage);
-            callApi1(prompt);
+//            callApi1(prompt);
         });
 
     }

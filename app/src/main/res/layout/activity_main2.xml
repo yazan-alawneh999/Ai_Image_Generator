@@ -5,17 +5,12 @@
 
     <data>
 
-        <variable
-            name="isLoading"
-            type="Boolean" />
 
         <variable
-            name="isAdmin"
-            type="Boolean" />
+            name="viewModel"
+            type="com.example.aiimagegenerator.viewmodel.AIGenerateViewModel" />
 
-        <variable
-            name="isAdminBackBtn"
-            type="Boolean" />
+        <import type="com.example.aiimagegenerator.viewmodel.AIGenerateViewModel.Status" />
 
         <import type="android.view.View" />
     </data>
@@ -40,6 +35,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?selectableItemBackgroundBorderless"
+            android:contentDescription="@string/app_name"
             android:src="@drawable/logout"
             app:layout_constraintBottom_toBottomOf="@+id/toolbar"
             app:layout_constraintEnd_toEndOf="@+id/toolbar"
@@ -52,6 +48,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?selectableItemBackgroundBorderless"
+            android:contentDescription="@string/app_name"
             android:src="@drawable/back_icon"
             app:layout_constraintBottom_toBottomOf="@+id/toolbar"
             app:layout_constraintEnd_toEndOf="parent"
@@ -77,19 +74,19 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:visibility="@{isAdmin?View.GONE:View.VISIBLE,default = visible}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/constraintLayout"
             app:layout_constraintTop_toBottomOf="@+id/toolbar">
 
+            <!--            android:visibility="@{viewModel.successLiveData == null ? View.GONE:View.VISIBLE,default = gone}"-->
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/cardView"
                 android:layout_width="@dimen/_280sdp"
                 android:layout_height="@dimen/_280sdp"
                 android:layout_gravity="center"
-                android:visibility="@{isLoading?View.GONE:View.VISIBLE,default = gone}"
+                android:visibility="gone"
                 app:cardCornerRadius="@dimen/_8sdp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -97,13 +94,14 @@
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias=".05">
 
+                <!--                android:visibility="@{viewModel.successLiveData == null ? View.GONE:View.VISIBLE,default = gone}"-->
                 <ImageView
                     android:id="@+id/generatedImage"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:contentDescription="@string/app_name"
                     android:scaleType="centerCrop"
-                    android:src="@drawable/imagen"
-                    android:visibility="@{isLoading?View.GONE:View.VISIBLE,default = gone}" />
+                    app:imageURL="@{viewModel.successLiveData.urlImageGenerates[0]}" />
 
 
             </androidx.cardview.widget.CardView>
@@ -120,7 +118,7 @@
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     app:layout_constraintBottom_toTopOf="@+id/imageDescription"
                     app:layout_constraintTop_toTopOf="@+id/imageDescription">
 
@@ -129,10 +127,25 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"
+                        android:text="@{viewModel.gemeniResponseSuccessLiveData}"
                         android:textColor="@color/white"
                         android:textSize="@dimen/_15sdp"
                         android:textStyle="bold"
-                        android:visibility="@{isLoading?View.GONE:View.VISIBLE,default = gone}"
+                        android:visibility="@{viewModel.gemeniResponseSuccessLiveData== null ? View.GONE:View.VISIBLE,default = gone}"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+                    <TextView
+                        android:id="@+id/errorDescription"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="@{viewModel.gemeniResponseFailerLiveData}"
+                        android:textColor="@color/white"
+                        android:textSize="@dimen/_15sdp"
+                        android:textStyle="bold"
+                        android:visibility="@{viewModel.gemeniResponseFailerLiveData == null ? View.GONE:View.VISIBLE,default = gone}"
                         app:layout_constraintBottom_toBottomOf="parent"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
@@ -149,7 +162,7 @@
                 android:layout_width="@dimen/_280sdp"
                 android:layout_height="@dimen/_280sdp"
                 android:layout_gravity="center"
-                android:visibility="@{isLoading?View.VISIBLE:View.GONE,default = gone}"
+                android:visibility="@{viewModel.gemeniRespnseStatus == Status.LOADING?View.VISIBLE:View.GONE,default = gone}"
                 app:cardCornerRadius="@dimen/_8sdp"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -173,10 +186,11 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/toolbar">
 
+<!--            android:visibility="@{viewModel.generationStatus == Status.LOADING ? View.GONE:View.VISIBLE,default = visible}"-->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="@{isAdmin?View.VISIBLE:View.GONE,default = gone}"
+                android:visibility="@{(viewModel.gemeniResponseSuccessLiveData != null|| viewModel.gemeniResponseFailerLiveData != null || viewModel.gemeniRespnseStatus == Status.LOADING ) ? View.GONE:View.VISIBLE,default = visible}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent">

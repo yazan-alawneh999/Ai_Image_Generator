@@ -3,17 +3,17 @@ package com.example.aiimagegenerator.models;
 import java.util.List;
 
 public class ImageGenerateResponse {
-//    {
-//  "created": 1589478378,
-//  "data": [
-//    {
-//      "url": "https://..."
-//    },
-//    {
-//      "url": "https://..."
-//    }
-//  ]
-//}
+    private List<String> urlImageGenerates;
 
-    public List<UrlImageGenerate> urlImageGenerates;
+    public ImageGenerateResponse(List<String> urlImageGenerates) {
+        this.urlImageGenerates = urlImageGenerates;
+    }
+
+    public List<String> getUrlImageGenerates() {
+        return urlImageGenerates;
+    }
+
+    public void setUrlImageGenerates(List<String> urlImageGenerates) {
+        this.urlImageGenerates = urlImageGenerates;
+    }
 }
